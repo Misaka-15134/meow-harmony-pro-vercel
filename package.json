@@ -1,0 +1,41 @@
+{
+  "name": "meow-harmony-pro",
+  "private": true,
+  "version": "1.0.0",
+  "description": "🎸 智能吉他和声助手 - AI驱动的和弦创作与分析工具",
+  "author": "Misaka-15134 <cy103050847@outlook.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Misaka-15134/meow-harmony-pro.git"
+  },
+  "keywords": [
+    "guitar",
+    "music",
+    "harmony",
+    "chord",
+    "ai",
+    "music-theory",
+    "react",
+    "typescript"
+  ],
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "@google/genai": "^1.30.0",
+    "recharts": "^3.5.0",
+    "lucide-react": "^0.555.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.14.0",
+    "@vitejs/plugin-react": "^5.0.0",
+    "typescript": "~5.8.2",
+    "vite": "^6.2.0"
+  }
+}
