@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { AIRecommendation } from '../types';
 import { llmServiceFactory } from '../services/llmService';
-import { API_MODELS } from '../constants';
+import { API_MODELS, CHORD_DEFINITIONS } from '../constants';
 import { Sparkles, Loader2, Key } from 'lucide-react';
 import { RockCat } from './CatDoodles';
 
@@ -157,16 +157,27 @@ const AIPanel: React.FC<AIPanelProps> = ({
             <p className="text-sm text-gray-700 leading-relaxed">"{result.reasoning}"</p>
           </div>
           <div className="flex flex-wrap gap-2">
-            {result.recommendations.map((rec, idx) => (
-              <button 
-                key={idx}
-                onClick={() => onApplyRecommendation(rec.note, rec.type)}
-                className="group relative bg-white border-2 border-cat-base rounded-xl px-4 py-2 hover:border-cat-primary hover:bg-cat-primary hover:text-white transition-all text-left shadow-sm flex-1 min-w-[100px]"
-              >
-                <div className="font-black text-base">{rec.note}{rec.type}</div>
-                <div className="text-[10px] text-gray-400 font-bold group-hover:text-white/90">{rec.label}</div>
-              </button>
-            ))}
+            {result.recommendations.map((rec, idx) => {
+              const chordDef = CHORD_DEFINITIONS[rec.type];
+              const chordName = `${rec.note}${chordDef?.shortName || rec.type}`;
+              const chordNameZh = chordDef?.longName_zh || rec.label;
+              
+              return (
+                <button 
+                  key={idx}
+                  onClick={() => onApplyRecommendation(rec.note, rec.type)}
+                  className="group relative bg-white border-2 border-cat-base rounded-xl px-4 py-2 hover:border-cat-primary hover:bg-cat-primary hover:text-white transition-all text-left shadow-sm flex-1 min-w-[100px]"
+                >
+                  <div className="font-black text-lg">{chordName}</div>
+                  <div className="text-[10px] text-gray-400 font-bold group-hover:text-white/90 mt-0.5">
+                    {chordNameZh}
+                  </div>
+                  <div className="text-[9px] text-cat-primary font-medium group-hover:text-white/70 mt-0.5">
+                    {rec.label}
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </div>
       )}

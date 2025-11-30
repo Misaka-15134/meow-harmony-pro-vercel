@@ -64,27 +64,39 @@ const Charts: React.FC<ChartsProps> = ({ sequence }) => {
       </div>
 
       {/* Pie Chart */}
-      <div className="h-48 w-full bg-white rounded-2xl p-4 shadow-sm flex flex-col items-center">
-        <h4 className="text-xs font-bold text-gray-400 uppercase mb-2">张力分布 (Tension Distribution)</h4>
-        <ResponsiveContainer width="100%" height="100%">
-          <PieChart>
-            <Pie
-              data={pieTensionData}
-              cx="50%"
-              cy="50%"
-              innerRadius={40}
-              outerRadius={60}
-              paddingAngle={5}
-              dataKey="value"
-            >
-              {pieTensionData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
-              ))}
-            </Pie>
-            <Legend verticalAlign="bottom" height={36} iconSize={8} wrapperStyle={{fontSize: '10px'}}/>
-            <Tooltip />
-          </PieChart>
-        </ResponsiveContainer>
+      <div className="w-full bg-white rounded-2xl p-4 shadow-sm">
+        <h4 className="text-xs font-bold text-gray-400 uppercase mb-3 text-center">张力分布 (Tension Distribution)</h4>
+        <div className="h-56 w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie
+                data={pieTensionData}
+                cx="50%"
+                cy="45%"
+                innerRadius={45}
+                outerRadius={70}
+                paddingAngle={3}
+                dataKey="value"
+                label={({ name, value, percent }) => `${value} (${(percent * 100).toFixed(0)}%)`}
+                labelLine={{ stroke: '#ccc', strokeWidth: 1 }}
+              >
+                {pieTensionData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
+                ))}
+              </Pie>
+              <Legend 
+                verticalAlign="bottom" 
+                height={32} 
+                iconSize={10} 
+                wrapperStyle={{fontSize: '11px', paddingTop: '8px'}}
+              />
+              <Tooltip 
+                contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)'}} 
+                itemStyle={{fontSize: '12px'}}
+              />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
       </div>
     </div>
   );

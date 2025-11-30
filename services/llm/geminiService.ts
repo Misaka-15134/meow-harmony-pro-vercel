@@ -53,20 +53,44 @@ export const fetchGeminiRecommendations = async (
     const text = response.text;
     if (!text) throw new Error("Empty response from AI");
     
+    console.log('[Gemini] Raw response:', text);
+    
     const parsed = JSON.parse(text);
+    console.log('[Gemini] Parsed data:', parsed);
     
     // 验证数据格式
     if (!parsed.reasoning || !Array.isArray(parsed.recommendations)) {
+      console.error('[Gemini] Invalid format:', parsed);
       throw new Error("无效的 AI 响应格式");
     }
     
-    // 验证每个推荐项
-    const validRecommendations = parsed.recommendations.filter((rec: any) => {
-      return rec.note && rec.type && rec.label && 
-             typeof rec.note === 'string' && 
-             typeof rec.type === 'string' &&
-             typeof rec.label === 'string';
-    });
+    // 验证和清理每个推荐项
+    const validRecommendations = parsed.recommendations
+      .map((rec: any) => {
+        console.log('[Gemini] Processing recommendation:', rec);
+        
+        // 确保字段存在且是字符串
+        const note = rec.note ? String(rec.note).trim() : undefined;
+        const type = rec.type ? String(rec.type).trim() : undefined;
+        const label = rec.label ? String(rec.label).trim() : undefined;
+        
+        if (!note || !type || !label) {
+          console.warn('[Gemini] Invalid recommendation (missing fields):', rec);
+          return null;
+        }
+        
+        // 验证 note 是否为有效的音符名
+        const validNotes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B', 'Db', 'Eb', 'Gb', 'Ab', 'Bb'];
+        if (!validNotes.includes(note)) {
+          console.warn('[Gemini] Invalid note name:', note);
+          return null;
+        }
+        
+        return { note, type, label };
+      })
+      .filter((rec: any) => rec !== null);
+    
+    console.log('[Gemini] Valid recommendations:', validRecommendations);
     
     if (validRecommendations.length === 0) {
       throw new Error("没有有效的推荐和弦");

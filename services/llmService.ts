@@ -14,6 +14,51 @@ const cleanAndParseJSON = (text: string) => {
   }
 };
 
+// --- 数据转换函数：统一不同 AI 返回的格式 ---
+const normalizeRecommendations = (data: any): { reasoning: string; recommendations: AIRecommendation[] } => {
+  console.log('[LLM] Normalizing data:', data);
+  
+  if (!data || !data.recommendations || !Array.isArray(data.recommendations)) {
+    console.error('[LLM] Invalid data format:', data);
+    throw new Error('AI 返回数据格式无效');
+  }
+  
+  const validNotes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B', 'Db', 'Eb', 'Gb', 'Ab', 'Bb'];
+  
+  const normalized = data.recommendations
+    .map((rec: any) => {
+      // 支持 note 或 root 字段
+      const note = (rec.note || rec.root || '').trim();
+      const type = (rec.type || '').trim();
+      // 支持 label 或 explanation 字段
+      const label = (rec.label || rec.explanation || '推荐').trim();
+      
+      if (!note || !type) {
+        console.warn('[LLM] Invalid recommendation (missing fields):', rec);
+        return null;
+      }
+      
+      if (!validNotes.includes(note)) {
+        console.warn('[LLM] Invalid note name:', note);
+        return null;
+      }
+      
+      return { note, type, label };
+    })
+    .filter((rec: any) => rec !== null);
+  
+  console.log('[LLM] Normalized recommendations:', normalized);
+  
+  if (normalized.length === 0) {
+    throw new Error('没有有效的推荐和弦');
+  }
+  
+  return {
+    reasoning: data.reasoning || '推荐理由',
+    recommendations: normalized
+  };
+};
+
 // --- 通用 Prompt 构建器 ---
 const buildSystemPrompt = () => {
   return "You are a music theory assistant. Please output valid JSON only.";
@@ -25,13 +70,25 @@ const buildUserPrompt = (context: string[], goal: string, customInstruction: str
     User Goal: ${goal}
     Additional Instructions: ${customInstruction}
     
-    IMPORTANT TASK: Suggest the next chords.
-    OUTPUT FORMAT: Return a STRICT JSON object (no markdown) with two fields:
-    1. "reasoning": A string explaining your thought process briefly.
-    2. "recommendations": An array of objects, where each object has:
-       - "root": string (e.g., "C", "F#")
-       - "type": string (valid types: maj, min, 7, maj7, min7, dim, aug, etc.)
-       - "explanation": string (why this chord fits)
+    IMPORTANT TASK: Suggest the next 3 chords for this progression.
+    
+    Valid chord types: maj, min, 5, 7, maj7, min7, minMaj7, sus4, sus2, 6, min6, 9, min9, maj9, add9, 7sus4, dim, dim7, aug
+    
+    OUTPUT FORMAT: Return a STRICT JSON object (no markdown, no code blocks) with this exact structure:
+    {
+      "reasoning": "A brief explanation in Chinese (Simplified)",
+      "recommendations": [
+        { "note": "C", "type": "maj", "label": "温暖稳定" },
+        { "note": "F", "type": "maj7", "label": "柔和色彩" },
+        { "note": "G", "type": "7", "label": "属功能" }
+      ]
+    }
+    
+    Make sure:
+    - "note" must be a single note name (C, C#, D, D#, E, F, F#, G, G#, A, A#, B)
+    - "type" must be one of the valid chord types listed above
+    - "label" should be a short Chinese description (2-4 characters)
+    - Provide exactly 3 recommendations
   `;
 };
 
@@ -68,7 +125,8 @@ const callOpenAICompatibleAPI = async (
 
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content || "{}";
-    return cleanAndParseJSON(content);
+    const parsed = cleanAndParseJSON(content);
+    return normalizeRecommendations(parsed);
 
   } catch (error) {
     console.error(`${model} Call Failed:`, error);
@@ -107,7 +165,8 @@ const fetchClaudeRecommendations = async (apiKey: string, context: string[], goa
 
     const data = await response.json();
     const content = data.content?.[0]?.text || "{}";
-    return cleanAndParseJSON(content);
+    const parsed = cleanAndParseJSON(content);
+    return normalizeRecommendations(parsed);
 
   } catch (error) {
     return { reasoning: "Claude 调用失败 (可能是CORS跨域限制，建议使用OpenRouter): " + error, recommendations: [] };
