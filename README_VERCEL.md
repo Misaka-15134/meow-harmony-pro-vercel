@@ -2,40 +2,11 @@
 
 这是专门为 Vercel 部署优化的版本。
 
-## 🚀 快速部署
+## 🚀 快速使用
 
-### 方法 1: 从 GitHub 导入（推荐）
+快速使用网址：**https://meow-harmony-pro-vercel.vercel.app/**
 
-1. **上传到 GitHub**
-   ```bash
-   git init
-   git add .
-   git commit -m "Initial commit"
-   git remote add origin https://github.com/Misaka-15134/meow-harmony-pro-vercel.git
-   git push -u origin main
-   ```
 
-2. **在 Vercel 导入**
-   - 访问 https://vercel.com
-   - New Project → Import Git Repository
-   - 选择此仓库 → Deploy
-
-### 方法 2: 使用 Vercel CLI
-
-```bash
-npm install -g vercel
-vercel login
-vercel
-vercel --prod
-```
-
-## ⚙️ 环境变量（可选）
-
-**不建议配置** - 让用户自己输入 API Key 更安全。
-
-如需配置：
-- `VITE_GEMINI_API_KEY`: Gemini API Key
-- `VITE_DEEPSEEK_API_KEY`: DeepSeek API Key
 
 ## 📚 详细文档
 
